@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Planning 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --matin: #3B82F6;
+    --aprem: #F59E0B;
+    --ferie: #DC2626;
+    --fermeture: #16A34A;
+    --bg: #0F172A;
+    --card: #1E293B;
+    --border: #334155;
+    --text: #F1F5F9;
+    --muted: #64748B;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.auth-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px; }
+  .auth-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px 24px; width:100%; max-width:400px; }
+  .auth-card h1 { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; background:linear-gradient(90deg,#60A5FA,#F59E0B); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px; text-align:center; }
+  .auth-card p { color:var(--muted); font-size:13px; text-align:center; margin-bottom:24px; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:500; }
+  .form-group input { width:100%; background:#0F172A; border:1px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; transition:border 0.2s; }
+  .form-group input:focus { border-color:var(--matin); }
+  .btn { width:100%; padding:13px; border-radius:10px; border:none; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .btn-primary { background:var(--matin); color:white; }
+  .btn-secondary { background:var(--card); color:var(--text); border:1px solid var(--border); margin-top:10px; }
+  .auth-switch { text-align:center; margin-top:16px; font-size:13px; color:var(--muted); }
+  .auth-switch a { color:#60A5FA; cursor:pointer; text-decoration:none; }
+  .alert { padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:16px; display:none; }
+  .alert-error { background:#2D1515; border:1px solid var(--ferie); color:#FCA5A5; }
+  .alert-success { background:#0F2D1A; border:1px solid var(--fermeture); color:#86EFAC; }
+  .alert-info { background:#1E293B; border:1px solid var(--matin); color:#93C5FD; }
+.planning-wrap { display:none; padding:16px 12px 40px; }
+  .top-bar { display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 16px; margin-bottom:20px; }
+  .top-bar-name { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; }
+  .top-bar-role { font-size:11px; color:var(--muted); }
+  .btn-logout { background:#2D1515; border:1px solid var(--ferie); color:#FCA5A5; padding:7px 14px; border-radius:8px; font-size:12px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; }
+  .admin-panel { background:var(--card); border:1px solid #7C3AED; border-radius:16px; padding:16px; margin-bottom:20px; display:none; }
+  .admin-panel h2 { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:#A78BFA; margin-bottom:14px; }
+  .user-item { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px; }
+  .user-item:last-child { border-bottom:none; }
+  .user-info { font-size:13px; }
+  .user-info .name { font-weight:600; }
+  .user-info .email { color:var(--muted); font-size:11px; }
+  .user-status { font-size:10px; padding:2px 8px; border-radius:10px; font-weight:700; }
+  .status-pending { background:#2D2010; color:#FDE68A; border:1px solid #F59E0B; }
+  .status-approved { background:#0F2D1A; color:#86EFAC; border:1px solid var(--fermeture); }
+  .user-actions { display:flex; gap:6px; }
+  .btn-approve { background:var(--fermeture); color:white; border:none; padding:5px 12px; border-radius:7px; font-size:11px; cursor:pointer; font-weight:600; }
+  .btn-reject { background:#2D1515; color:#FCA5A5; border:1px solid var(--ferie); padding:5px 12px; border-radius:7px; font-size:11px; cursor:pointer; font-weight:600; }
+header.cal-header { text-align:center; padding:20px 16px; background:linear-gradient(135deg,#1E3A5F,#1E293B,#3B1F6B); border-radius:18px; border:1px solid var(--border); margin-bottom:20px; }
+  header.cal-header h1 { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; background:linear-gradient(90deg,#60A5FA,#F59E0B); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  header.cal-header p { color:var(--muted); font-size:11px; }
+  .legend { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:18px; }
+  .legend-item { display:flex; align-items:center; gap:5px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:4px 11px; font-size:11px; font-weight:500; }
+  .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+  .stat { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; text-align:center; }
+  .stat-num { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; line-height:1; margin-bottom:3px; }
+  .stat-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+  .month-tabs { display:flex; gap:6px; overflow-x:auto; margin-bottom:14px; scrollbar-width:none; }
+  .month-tabs::-webkit-scrollbar { display:none; }
+  .mtab { flex-shrink:0; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--muted); padding:6px 12px; font-size:12px; cursor:pointer; font-weight:500; transition:all 0.2s; }
+  .mtab.active { background:var(--matin); border-color:var(--matin); color:white; }
+  .month-nav { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .nav-btn { background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text); padding:8px 14px; font-size:18px; cursor:pointer; }
+  .month-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; flex:1; text-align:center; }
+  .cal-wrap { background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:14px; }
+  .cal-headers { display:grid; grid-template-columns:repeat(5,1fr) 0.55fr 0.55fr; background:#0F172A; border-bottom:1px solid var(--border); }
+  .cal-hdr { text-align:center; padding:8px 2px; font-size:10px; font-weight:700; text-transform:uppercase; color:var(--muted); }
+  .cal-hdr.we { color:#475569; }
+  .cal-grid { display:grid; grid-template-columns:repeat(5,1fr) 0.55fr 0.55fr; gap:1px; background:var(--border); }
+  .cal-cell { background:var(--card); min-height:56px; padding:6px 3px 5px; display:flex; flex-direction:column; align-items:center; gap:3px; position:relative; }
+  .cal-cell.empty { background:#0D1626; }
+  .cal-cell.we-cell { background:#161F2E; }
+  .cal-cell.t-matin { border-top:3px solid var(--matin); }
+  .cal-cell.t-aprem { border-top:3px solid var(--aprem); }
+  .cal-cell.t-ferie { border-top:3px solid var(--ferie); background:#1E0A0A !important; }
+  .cal-cell.t-fermeture { border-top:3px solid var(--fermeture); }
+  .cal-cell.t-repos { border-top:3px solid #2D3748; }
+  .day-n { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; line-height:1; }
+  .badge { font-size:7px; font-weight:700; padding:2px 4px; border-radius:4px; text-transform:uppercase; width:100%; text-align:center; }
+  .b-matin { background:var(--matin); color:white; }
+  .b-aprem { background:var(--aprem); color:#1C0A00; }
+  .b-ferie { background:var(--ferie); color:white; }
+  .b-fermeture { background:var(--fermeture); color:white; }
+  .sub15 { font-size:8px; color:#FCA5A5; font-weight:700; text-align:center; }
+  .today-dot { width:5px; height:5px; background:#22C55E; border-radius:50%; position:absolute; top:2px; right:2px; }
+  .week-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:14px; }
+  .week-box h3 { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+  .wrow { display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #1E293B; flex-wrap:wrap; gap:4px; }
+  .wrow:last-child { border-bottom:none; }
+  .wlbl { color:var(--muted); font-size:11px; min-width:60px; }
+  .wtype { font-weight:700; padding:3px 10px; border-radius:6px; font-size:10px; }
+  .wm { background:var(--matin); color:white; }
+  .wa { background:var(--aprem); color:#1C0A00; }
+  .wf { background:#334155; color:#94A3B8; }
+  .wx { background:#7C3AED; color:white; }
+</style>
+</head>
+<body>
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-card">
+    <h1>🗓 Planning 2026</h1>
+    <p id="authSubtitle">Connectez-vous pour accéder au planning</p>
+    <div class="alert alert-error" id="alertError"></div>
+    <div class="alert alert-success" id="alertSuccess"></div>
+    <div class="alert alert-info" id="alertInfo"></div>
+    <div id="loginForm">
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+      <button class="btn btn-primary" onclick="doLogin()">Se connecter</button>
+      <div class="auth-switch" style="margin-top:10px"><a onclick="showForgot()">Mot de passe oublié ?</a></div>
+      <div class="auth-switch">Pas encore de compte ? <a onclick="showRegister()">Demander l'accès</a></div>
+    </div>
+    <div id="forgotForm" style="display:none">
+      <div class="form-group"><label>Votre adresse email</label><input type="email" id="forgotEmail" placeholder="votre@email.com"></div>
+      <button class="btn btn-primary" onclick="doForgot()">Envoyer le lien</button>
+      <button class="btn btn-secondary" onclick="showLogin()">← Retour connexion</button>
+    </div>
+    <div id="resetForm" style="display:none">
+      <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="resetPassword" placeholder="Nouveau mot de passe"></div>
+      <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="resetPassword2" placeholder="Répétez le mot de passe"></div>
+      <button class="btn btn-primary" onclick="doReset()">Enregistrer</button>
+    </div>
+    <div id="registerForm" style="display:none">
+      <div class="form-group"><label>Prénom</label><input type="text" id="regPrenom" placeholder="Votre prénom"></div>
+      <div class="form-group"><label>Nom</label><input type="text" id="regNom" placeholder="Votre nom"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe</label><input type="password" id="regPassword" placeholder="Choisissez un mot de passe"></div>
+      <div class="form-group"><label>Confirmer le mot de passe</label><input type="password" id="regPassword2" placeholder="Répétez votre mot de passe"></div>
+      <button class="btn btn-primary" onclick="doRegister()">Demander l'accès</button>
+      <button class="btn btn-secondary" onclick="showLogin()">← Retour connexion</button>
+    </div>
+  </div>
+</div>
+<div class="planning-wrap" id="planningWrap">
+  <div class="top-bar">
+    <div>
+      <div class="top-bar-name" id="topName"></div>
+      <div class="top-bar-role" id="topRole"></div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
+  </div>
+  <div class="admin-panel" id="adminPanel">
+    <h2>👑 Panel Admin</h2>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">⏳ En attente d'approbation</div>
+    <div id="userList"><p style="color:var(--muted);font-size:13px">Chargement...</p></div>
+    <button onclick="showApprovedPage()" style="width:100%;margin-top:14px;padding:10px;background:#1E293B;border:1px solid var(--border);border-radius:10px;color:#94A3B8;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">👥 Voir les utilisateurs approuvés →</button>
+  </div>
+  <header class="cal-header">
+    <h1>🗓 Mon Planning 2026</h1>
+    <p>Équipe Production · Lundi → Vendredi</p>
+  </header>
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:var(--matin)"></div>Matin</div>
+    <div class="legend-item"><div class="dot" style="background:var(--aprem)"></div>Après-midi</div>
+    <div class="legend-item"><div class="dot" style="background:#475569"></div>Repos</div>
+    <div class="legend-item"><div class="dot" style="background:var(--ferie)"></div>Férié</div>
+    <div class="legend-item"><div class="dot" style="background:var(--fermeture)"></div>Fermeture</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num" style="color:var(--matin)" id="cMatin">-</div><div class="stat-lbl">Jours Matin restants</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--aprem)" id="cAprem">-</div><div class="stat-lbl">Jours Après-midi restants</div></div>
+  </div>
+  <div class="month-tabs" id="monthTabs"></div>
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div class="month-title" id="mTitle"></div>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="cal-wrap">
+    <div class="cal-headers">
+      <div class="cal-hdr">Lun</div><div class="cal-hdr">Mar</div><div class="cal-hdr">Mer</div><div class="cal-hdr">Jeu</div><div class="cal-hdr">Ven</div><div class="cal-hdr we">S</div><div class="cal-hdr we">D</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+  <div class="week-box"><h3>Semaines du mois</h3><div id="weekRows"></div></div>
+</div>
+
+<div id="approvedPage" style="display:none;padding:16px 12px 40px;">
+  <div class="top-bar">
+    <div><div class="top-bar-name">👥 Utilisateurs approuvés</div><div class="top-bar-role">Gestion des comptes</div></div>
+    <button class="btn-logout" onclick="hideApprovedPage()" style="background:#1E293B;border-color:#334155;color:#94A3B8;">← Retour</button>
+  </div>
+  <div class="admin-panel" style="display:block;margin-top:16px;">
+    <div id="approvedList"><p style="color:var(--muted);font-size:13px">Chargement...</p></div>
+  </div>
+</div>
+<script>
+let currentUser = null;
+
+function showAlert(type, msg) {
+  ['alertError','alertSuccess','alertInfo'].forEach(id => {
+    const el = document.getElementById(id);
+    el.style.display = 'none'; el.textContent = '';
+  });
+  const el = document.getElementById('alert' + type.charAt(0).toUpperCase() + type.slice(1));
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function showRegister() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'block';
+  document.getElementById('authSubtitle').textContent = "Créez votre demande d'accès";
+}
+
+function showLogin() {
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('resetForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('authSubtitle').textContent = 'Connectez-vous pour accéder au planning';
+}
+
+function showForgot() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'block';
+  document.getElementById('authSubtitle').textContent = 'Réinitialisation du mot de passe';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) return showAlert('error', 'Remplissez tous les champs');
+  try {
+    const res = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'login',email,password}) });
+    const data = await res.json();
+    if (!res.ok) return showAlert('error', data.error || 'Erreur de connexion');
+    currentUser = { email, ...data };
+    sessionStorage.setItem('user', JSON.stringify(currentUser));
+    showPlanning();
+  } catch(e) { showAlert('error', 'Erreur réseau'); }
+}
+
+async function doRegister() {
+  const prenom = document.getElementById('regPrenom').value.trim();
+  const nom = document.getElementById('regNom').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const password2 = document.getElementById('regPassword2').value;
+  if (!prenom||!nom||!email||!password||!password2) return showAlert('error', 'Remplissez tous les champs');
+  if (password !== password2) return showAlert('error', '❌ Les mots de passe ne correspondent pas');
+  if (password.length < 6) return showAlert('error', 'Mot de passe trop court (min 6 caractères)');
+  try {
+    const res = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'register',email,password,nom,prenom}) });
+    const data = await res.json();
+    if (!res.ok) return showAlert('error', data.error || 'Erreur inscription');
+    showAlert('success', "✅ Demande envoyée ! En attente d'approbation.");
+    setTimeout(showLogin, 3000);
+  } catch(e) { showAlert('error', 'Erreur réseau'); }
+}
+
+async function doForgot() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) return showAlert('error', 'Entrez votre email');
+  try {
+    const res = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'forgot',email}) });
+    const data = await res.json();
+    if (!res.ok) return showAlert('error', data.error || 'Erreur');
+    showAlert('success', '✅ Email envoyé ! Vérifiez votre boîte mail.');
+  } catch(e) { showAlert('error', 'Erreur réseau'); }
+}
+
+async function doReset() {
+  const password = document.getElementById('resetPassword').value;
+  const password2 = document.getElementById('resetPassword2').value;
+  if (!password||!password2) return showAlert('error', 'Remplissez tous les champs');
+  if (password !== password2) return showAlert('error', '❌ Les mots de passe ne correspondent pas');
+  if (password.length < 6) return showAlert('error', 'Mot de passe trop court');
+  const token = new URLSearchParams(window.location.search).get('reset');
+  try {
+    const res = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'reset',token,newPassword:password}) });
+    const data = await res.json();
+    if (!res.ok) return showAlert('error', data.error || 'Erreur');
+    showAlert('success', '✅ Mot de passe mis à jour !');
+    setTimeout(() => { window.history.replaceState({},'',' /'); showLogin(); }, 2000);
+  } catch(e) { showAlert('error', 'Erreur réseau'); }
+}
+
+function doLogout() {
+  currentUser = null;
+  sessionStorage.removeItem('user');
+  document.getElementById('planningWrap').style.display = 'none';
+  document.getElementById('authWrap').style.display = 'flex';
+  showLogin();
+}
+
+function showPlanning() {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('planningWrap').style.display = 'block';
+  document.getElementById('topName').textContent = currentUser.prenom + ' ' + currentUser.nom;
+  document.getElementById('topRole').textContent = currentUser.role === 'admin' ? '👑 Administrateur' : '👤 Utilisateur';
+  if (currentUser.role === 'admin') {
+    document.getElementById('adminPanel').style.display = 'block';
+    loadUsers();
+  }
+  calcStats();
+  setTimeout(() => renderAll(), 50);
+}
+async function loadUsers() {
+  const res = await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'list_users'}) });
+  const users = await res.json();
+  const pending = users.filter(u => !u.approved);
+  const approved = users.filter(u => u.approved);
+  const elP = document.getElementById('userList');
+  if (!pending.length) {
+    elP.innerHTML = '<p style="color:var(--muted);font-size:13px">✅ Aucune demande en attente</p>';
+  } else {
+    elP.innerHTML = pending.map(u => `
+      <div class="user-item">
+        <div class="user-info"><div class="name">${u.prenom} ${u.nom}</div><div class="email">${u.email}</div></div>
+        <span class="user-status status-pending">⏳ En attente</span>
+        <div class="user-actions">
+          <button class="btn-approve" onclick="approveUser('${u.id}',true)">✓ Approuver</button>
+          <button class="btn-reject" onclick="approveUser('${u.id}',false,true)">✕</button>
+        </div>
+      </div>`).join('');
+  }
+  const elA = document.getElementById('approvedList');
+  if (!elA) return;
+  if (!approved.length) {
+    elA.innerHTML = '<p style="color:var(--muted);font-size:13px">Aucun utilisateur approuvé</p>';
+  } else {
+    elA.innerHTML = approved.map(u => `
+      <div class="user-item">
+        <div class="user-info"><div class="name">${u.prenom} ${u.nom}</div><div class="email">${u.email}</div></div>
+        <span class="user-status status-approved">✅ Approuvé</span>
+        <div class="user-actions">
+          <button class="btn-approve" style="background:#7C3AED" onclick="resetUserPassword('${u.id}','${u.prenom} ${u.nom}')">🔑 Reset</button>
+          <button class="btn-reject" onclick="approveUser('${u.id}',false,true)">✕ Supprimer</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function showApprovedPage() {
+  document.getElementById('planningWrap').style.display = 'none';
+  document.getElementById('approvedPage').style.display = 'block';
+  loadUsers();
+}
+
+function hideApprovedPage() {
+  document.getElementById('approvedPage').style.display = 'none';
+  document.getElementById('planningWrap').style.display = 'block';
+}
+
+async function approveUser(id, approved, del=false) {
+  if (del) {
+    if (!confirm('Supprimer cet utilisateur ?')) return;
+    await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'delete',userId:id}) });
+  } else {
+    await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'approve',userId:id,approved}) });
+  }
+  loadUsers();
+}
+
+async function resetUserPassword(id, name) {
+  const newPwd = prompt('Nouveau mot de passe pour ' + name + ' :');
+  if (!newPwd || newPwd.length < 6) return alert('Mot de passe trop court');
+  await fetch('/api/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'reset_password',userId:id,newPassword:newPwd}) });
+  alert('✅ Mot de passe de ' + name + ' réinitialisé !');
+}
+const FERIES = new Set(['2026-01-01','2026-04-06','2026-05-01','2026-05-14','2026-05-25','2026-07-21','2026-07-28','2026-08-15','2026-11-01','2026-11-11','2026-12-25','2026-12-31']);
+const FERMETURES = new Set();
+for (let d=24;d<=31;d++) {
+  if (d===28) continue;
+  const dow=new Date(2026,6,d).getDay();
+  if (dow===0||dow===6) continue;
+  FERMETURES.add('2026-07-'+String(d).padStart(2,'0'));
+}
+FERMETURES.add('2026-11-02');
+
+function isoWeek(date) {
+  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  const day=d.getUTCDay()||7; d.setUTCDate(d.getUTCDate()+4-day);
+  const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d-y)/86400000)+1)/7);
+}
+
+function toDS(year,m0,d) { return year+'-'+String(m0+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
+
+function dayType(ds) {
+  const date=new Date(ds+'T12:00:00'); const dow=date.getDay();
+  if (FERMETURES.has(ds)) return 'fermeture';
+  if (FERIES.has(ds)) return 'ferie';
+  if (dow===0||dow===6) return 'repos';
+  return isoWeek(date)%2===0?'matin':'aprem';
+}
+
+const MNAMES=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+let curMonth=new Date().getMonth();
+
+function calcStats() {
+  const today=new Date();
+  const todayStr=toDS(today.getFullYear(),today.getMonth(),today.getDate());
+  let m=0,a=0;
+  for (let mo=0;mo<12;mo++) {
+    const days=new Date(2026,mo+1,0).getDate();
+    for (let d=1;d<=days;d++) {
+      const ds=toDS(2026,mo,d);
+      if (ds<todayStr) continue;
+      const t=dayType(ds);
+      if (t==='matin') m++;
+      else if (t==='aprem') a++;
+    }
+  }
+  document.getElementById('cMatin').textContent=m;
+  document.getElementById('cAprem').textContent=a;
+}
+
+function renderTabs() {
+  const el=document.getElementById('monthTabs'); el.innerHTML='';
+  MNAMES.forEach((n,i) => {
+    const t=document.createElement('div');
+    t.className='mtab'+(i===curMonth?' active':'');
+    t.textContent=n.substring(0,3);
+    t.onclick=()=>{ curMonth=i; renderAll(); };
+    el.appendChild(t);
+  });
+  setTimeout(()=>{ const a=el.querySelector('.active'); if(a) a.scrollIntoView({block:'nearest',inline:'center'}); },100);
+}
+function renderCal() {
+  const grid=document.getElementById('calGrid');
+  document.getElementById('mTitle').textContent=MNAMES[curMonth]+' 2026';
+  grid.innerHTML='';
+  const firstDow=new Date(2026,curMonth,1).getDay();
+  const offset=firstDow===0?6:firstDow-1;
+  const dim=new Date(2026,curMonth+1,0).getDate();
+  const now=new Date();
+  const todayStr=toDS(now.getFullYear(),now.getMonth(),now.getDate());
+  for (let i=0;i<offset;i++) { const c=document.createElement('div'); c.className='cal-cell empty'; grid.appendChild(c); }
+  for (let d=1;d<=dim;d++) {
+    const ds=toDS(2026,curMonth,d);
+    const dow=new Date(2026,curMonth,d).getDay();
+    const isWE=(dow===0||dow===6);
+    const type=dayType(ds);
+    const disp=(isWE&&type!=='ferie'&&type!=='fermeture')?'repos':type;
+    const cell=document.createElement('div');
+    cell.className='cal-cell t-'+disp+(isWE?' we-cell':'');
+    if (ds===todayStr) { const dot=document.createElement('div'); dot.className='today-dot'; cell.appendChild(dot); }
+    const num=document.createElement('div'); num.className='day-n';
+    const cols={matin:'#60A5FA',aprem:'#F59E0B',ferie:'#FF6B6B',fermeture:'#4ADE80',repos:'#475569'};
+    num.style.color=cols[disp]; num.textContent=d; cell.appendChild(num);
+    if (!isWE&&disp!=='repos') {
+      const badge=document.createElement('div'); badge.className='badge b-'+disp;
+      const isJul28=(curMonth===6&&d===28); const isDec31=(curMonth===11&&d===31);
+      if (isJul28||isDec31) {
+        badge.textContent='Férié'; cell.appendChild(badge);
+        const sub=document.createElement('div'); sub.className='sub15';
+        sub.textContent=isJul28?'= 15/08':'= 1/11'; cell.appendChild(sub);
+      } else {
+        const lbls={matin:'Matin',aprem:'Aprèm',ferie:'Férié',fermeture:'Fermé'};
+        badge.textContent=lbls[disp]||''; cell.appendChild(badge);
+      }
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function renderWeeks() {
+  const el=document.getElementById('weekRows'); el.innerHTML='';
+  const days=new Date(2026,curMonth+1,0).getDate();
+  const weeks={};
+  const FERIE_NAMES={'2026-01-01':'Nouvel An','2026-04-06':'Lundi de Pâques','2026-05-01':'Fête du Travail','2026-05-14':'Ascension','2026-05-25':'Lundi de Pentecôte','2026-07-21':'Fête Nationale','2026-07-28':'Récup. 15/08','2026-11-11':'Armistice','2026-12-25':'Noël','2026-12-31':'Récup. 1/11'};
+  for (let d=1;d<=days;d++) {
+    const date=new Date(2026,curMonth,d); const dow=date.getDay();
+    if (dow===0||dow===6) continue;
+    const w=isoWeek(date);
+    if (!weeks[w]) weeks[w]={types:[],d1:d,d2:d,feries:[]};
+    const t=dayType(toDS(2026,curMonth,d));
+    weeks[w].types.push(t); weeks[w].d2=d;
+    if (t==='ferie') weeks[w].feries.push(d);
+  }
+  Object.entries(weeks).sort((a,b)=>+a[0]-+b[0]).forEach(([w,data])=>{
+    const hasMatin=data.types.includes('matin'); const hasAprem=data.types.includes('aprem');
+    const allOff=data.types.every(t=>t==='ferie'||t==='fermeture');
+    let cls,lbl;
+    if (allOff){cls='wf';lbl='🏭 Fermé';}
+    else if (hasMatin&&hasAprem){cls='wx';lbl='🔀 Mixte';}
+    else if (hasMatin){cls='wm';lbl='🌅 Matin';}
+    else if (hasAprem){cls='wa';lbl='🌆 Après-midi';}
+    else{cls='wf';lbl='Repos';}
+    let ferieHtml='';
+    data.feries.forEach(d=>{ const ds=toDS(2026,curMonth,d); const name=FERIE_NAMES[ds]||'Férié'; ferieHtml+='<span style="display:inline-block;margin-top:3px;background:#2D1515;color:#FCA5A5;border:1px solid #DC2626;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600;">🔴 '+d+' - '+name+'</span> '; });
+    const row=document.createElement('div'); row.className='wrow';
+    row.innerHTML='<div style="width:100%"><div style="display:flex;align-items:center;justify-content:space-between;"><span class="wlbl">Sem. '+w+'</span><span style="color:var(--muted);font-size:10px">'+data.d1+'→'+data.d2+' '+MNAMES[curMonth].substring(0,3)+'</span><span class="wtype '+cls+'">'+lbl+'</span></div>'+(ferieHtml?'<div style="margin-top:2px">'+ferieHtml+'</div>':'')+'</div>';
+    el.appendChild(row);
+  });
+  let weFerieHtml='';
+  for (let d=1;d<=days;d++) {
+    const dow=new Date(2026,curMonth,d).getDay();
+    if (dow===0||dow===6) {
+      const ds=toDS(2026,curMonth,d);
+      if (FERIES.has(ds)) {
+        const name=ds==='2026-08-15'?'Assomption':ds==='2026-11-01'?'Toussaint':'Férié';
+        const jourNom=dow===6?'Sam':'Dim';
+        weFerieHtml+='<div style="margin-top:5px;background:#1A0D0D;border:1px solid #DC2626;border-radius:7px;padding:5px 10px;font-size:11px;color:#FCA5A5;">🔴 '+jourNom+' '+d+' - '+name+' (week-end)</div>';
+      }
+    }
+  }
+  if (weFerieHtml) { const box=document.createElement('div'); box.style.marginTop='8px'; box.innerHTML='<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;font-weight:700;">Fériés week-end</div>'+weFerieHtml; el.appendChild(box); }
+}
+
+function changeMonth(dir) { curMonth=(curMonth+dir+12)%12; renderAll(); }
+function renderAll() { renderTabs(); renderCal(); renderWeeks(); }
+
+const saved=sessionStorage.getItem('user');
+const resetToken=new URLSearchParams(window.location.search).get('reset');
+if (resetToken) {
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('resetForm').style.display='block';
+  document.getElementById('authSubtitle').textContent='Créez votre nouveau mot de passe';
+} else if (saved) {
+  currentUser=JSON.parse(saved);
+  showPlanning();
+}
+</script>
+</body>
+</html>
