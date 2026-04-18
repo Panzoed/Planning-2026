@@ -3,14 +3,15 @@ const bcrypt = require('bcryptjs');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 const ADMIN_EMAIL = 'siciliano_messinese@hotmail.it';
-const SITE_URL = process.env.SITE_URL || 'https://planning-2026.vercel.app';
+const SITE_URL = process.env.SITE_URL || 'https://ppl-calendrier-2026.vercel.app';
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { action, email, password, nom, prenom, token, newPassword } = req.body || {};
+  const { action, password, nom, prenom, token, newPassword } = req.body || {};
+  const email = (req.body?.email || '').toLowerCase().trim();
 
   if (action === 'login') {
     if (email === ADMIN_EMAIL) {
